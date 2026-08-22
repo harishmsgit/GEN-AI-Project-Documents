@@ -1,5 +1,143 @@
 **GenAI agent setup cheat sheet**
 
+
+```markdown
+# 🚀 GenAI Agent Setup Cheat Sheet
+
+## 📑 Table of Contents
+1. [Environment Setup](#1-environment-setup)
+2. [Embeddings + Vector DB](#2-embeddings--vector-db)
+3. [Simple Agent Workflow](#3-simple-agent-workflow)
+4. [API Interface](#4-api-interface)
+5. [Containerization + Deployment](#5-containerization--deployment)
+6. [Monitoring](#6-monitoring)
+7. [Kubernetes Deployment YAML Template](#7-kubernetes-deployment-yaml-template)
+8. [Helm Chart Structure](#8-helm-chart-structure)
+   - [Chart.yaml](#chartyaml)
+   - [values.yaml](#valuesyaml)
+   - [deployment.yaml](#templatesdeploymentyaml)
+   - [service.yaml](#templatesserviceyaml)
+   - [ingress.yaml](#templatesingressyaml)
+   - [secrets.yaml](#templatessecretsyaml)
+9. [GitHub Actions CI/CD Pipeline](#9-github-actions-cicd-pipeline)
+   - [Basic Build & Deploy](#basic-build--deploy)
+   - [With Test Stage](#with-test-stage)
+   - [Matrix Strategy](#matrix-strategy)
+   - [Blue-Green Deployment](#blue-green-deployment)
+   - [Blue-Green with Rollback](#blue-green-with-rollback)
+   - [Canary Rollout](#canary-rollout)
+   - [Canary + Health Checks](#canary--health-checks)
+
+---
+
+## 1. Environment Setup
+```bash
+python3 -m venv venv && source venv/bin/activate
+pip install openai langchain langgraph fastapi streamlit sqlite3
+```
+
+---
+
+## 2. Embeddings + Vector DB
+```bash
+pip install faiss-cpu
+python -m langchain.embeddings.openai --input docs/ --output faiss_index/
+```
+
+---
+
+## 3. Simple Agent Workflow
+```python
+from langchain.agents import initialize_agent, Tool
+from langchain.llms import OpenAI
+
+llm = OpenAI(model="gpt-4")
+tools = [Tool(name="SearchDocs", func=search_docs)]
+agent = initialize_agent(tools, llm, agent="zero-shot-react-description")
+```
+
+---
+
+## 4. API Interface
+```bash
+uvicorn app:app --reload
+```
+
+```python
+from fastapi import FastAPI
+app = FastAPI()
+
+@app.post("/ask")
+def ask_agent(query: str):
+    return agent.run(query)
+```
+
+---
+
+## 5. Containerization + Deployment
+```bash
+docker build -t genai-agent .
+docker run -p 8000:8000 genai-agent
+
+aws ecr create-repository --repository-name genai-agent
+docker tag genai-agent:latest <ECR_URL>/genai-agent:latest
+docker push <ECR_URL>/genai-agent:latest
+
+kubectl apply -f k8s-deployment.yaml
+```
+
+---
+
+## 6. Monitoring
+```bash
+kubectl apply -f prometheus.yaml
+kubectl apply -f grafana.yaml
+
+helm install elk elastic/elasticsearch
+helm install kibana elastic/kibana
+```
+
+---
+
+## 7. Kubernetes Deployment YAML Template
+*(include your deployment/service/ingress YAML here)*
+
+---
+
+## 8. Helm Chart Structure
+```
+genai-agent/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── ingress.yaml
+    └── secrets.yaml
+```
+
+*(add each file’s content under its heading)*
+
+---
+
+## 9. GitHub Actions CI/CD Pipeline
+*(include your pipeline YAMLs with subsections for each strategy)*
+
+---
+
+### ✅ Best Practices
+- Use **inline code blocks** for commands.  
+- Use **fenced code blocks** (```yaml, ```python) for configs and scripts.  
+- Keep **section numbers aligned with the index** for easy navigation.  
+- Add **anchors in the TOC** so GitHub auto‑links to each section.  
+
+---
+
+This format will render beautifully in GitHub, with a clickable index at the top and clean separation between steps.  
+
+👉 Do you want me to also **add collapsible sections (`<details>`)** for long YAML/CI/CD snippets, so the file stays compact but expandable when needed?
+
+
 ### 1. Environment Setup
 ```bash
 # Create virtual environment
